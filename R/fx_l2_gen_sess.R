@@ -1,5 +1,5 @@
 toSeason <- function(.date, num = TRUE) {
-  md <- as.numeric(paste0(month(.date), stringr::str_pad(day(.date), width = 2, side = "left",pad = "0")))
+  md <- as.numeric(paste0(lubridate::month(.date), stringr::str_pad(lubridate::day(.date), width = 2, side = "left",pad = "0")))
   seasons <- if (num) c(1,2,3,4) else c("win", "spr","sum","fall")
   md[dplyr::between(md, 101, 320) | dplyr::between(md, 1221, 1231)] <- seasons[[1]]
   md[dplyr::between(md, 321, 620)] <- seasons[[2]]
@@ -13,10 +13,10 @@ hmdetc <- function(x) {
   data.frame(
     start = x,
     season = toSeason(x),
-    month = month(x),
-    day = day(x),
-    wewd = wday(x),
-    hour = hour(x),
+    month = lubridate::month(x),
+    day = lubridate::day(x),
+    wewd = lubridate::wday(x),
+    hour = lubridate::hour(x),
     minute = round(minute(x)/15)*15
   )
 }
@@ -42,26 +42,26 @@ generate.interval.xgb.Booster <- function(start, duration, model) {
     minutes.charging = seq(0, duration * 60, by = 15),
     sess.start = c(1, rep(0, length(interval) - 1))) %>%
     mutate(
-      month = month(int.start),
+      month = lubridate::month(int.start),
       season = toSeason(int.start),
-      day = day(int.start),
-      hour = hour(int.start),
-      minute = minute(int.start),
-      wewd = wday(int.start)
+      day = lubridate::day(int.start),
+      hour = lubridate::hour(int.start),
+      minute = lubridate::minute(int.start),
+      wewd = lubridate::wday(int.start)
     )
 
-  int.data <- xgboost::xgb.DMatrix(data.matrix(startdf[c("minutes.charging",
-                                                "sess.start",
-                                                "season",
-                                                "month",
-                                                "day",
-                                                "hour",
-                                                "minute",
-                                                "wewd")]))
+  int.data <- xgboost::xgb.DMatrix(
+    data.matrix(startdf[c("minutes.charging",
+                          "sess.start",
+                          "season",
+                          "month",
+                          "day",
+                          "hour",
+                          "minute",
+                          "wewd")]))
 
-  startdf %>%
-    mutate(interval.kwh = as.numeric(predict(model, int.data)),
-           interval.kwh = ifelse(interval.kwh < 0, 0, interval.kwh))
+  dplyr::mutate(startdf, interval.kwh = as.numeric(predict(model, int.data)),
+                interval.kwh = ifelse(interval.kwh < 0, 0, interval.kwh))
 }
 
 #' @title Generate a level 2 charging Session for home chargers
@@ -119,5 +119,8 @@ syn_l2_custs <- function(start,
     customers[[i]] <- sessions1
   }
 
-  dplyr::bind_rows(customers, .id = "customer_id")
+  dplyr::select(
+    dplyr::bind_rows(customers, .id = "customer_id"),
+    customer_id, int.start, interval.kwh
+    )
 }
