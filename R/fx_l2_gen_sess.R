@@ -6,7 +6,6 @@ toSeason <- function(.date, num = TRUE) {
   md[dplyr::between(md, 621, 920)] <- seasons[[3]]
   md[dplyr::between(md, 921, 1220)] <- seasons[[4]]
   md
-
 }
 
 hmdetc <- function(x) {
@@ -33,6 +32,29 @@ generate.interval <- function(start, duration, model) {
 }
 
 #' @rdname generate.interval
+#' @export
+generate.interval.nn <- function(start, duration, model = l2_model.nn) {
+
+  interval <- seq.POSIXt(start, start + lubridate::as.period(duration, unit = "hours"), by = 15*60)
+
+  startdf <- data.frame(
+    int.start = interval,
+    minutes.charging = seq(0, duration * 60, by = 15),
+    sess.start = c(1, rep(0, length(interval) - 1))) %>%
+    dplyr::mutate(
+      month = lubridate::month(int.start),
+      season = toSeason(int.start),
+      day = lubridate::day(int.start),
+      hour = lubridate::hour(int.start),
+      minute = lubridate::minute(int.start),
+      wewd = lubridate::wday(int.start)
+    )
+  dplyr::mutate(startdf, interval.kwh = as.numeric(neural_net:::predict.nn(model, startdf)),
+                interval.kwh = ifelse(interval.kwh < 0, 0, interval.kwh))
+}
+
+#' @rdname generate.interval
+#' @export
 generate.interval.xgb.Booster <- function(start, duration, model) {
 
   interval <- seq.POSIXt(start, start + lubridate::as.period(duration, unit = "hours"), by = 15*60)
@@ -41,7 +63,7 @@ generate.interval.xgb.Booster <- function(start, duration, model) {
     int.start = interval,
     minutes.charging = seq(0, duration * 60, by = 15),
     sess.start = c(1, rep(0, length(interval) - 1))) %>%
-    mutate(
+    dplyr::mutate(
       month = lubridate::month(int.start),
       season = toSeason(int.start),
       day = lubridate::day(int.start),
@@ -72,7 +94,14 @@ generate.interval.xgb.Booster <- function(start, duration, model) {
 #' @export
 
 gen_l2_sess <- function(start, duration) {
-  generate.interval(start = start, duration = duration, model = l2_model)
+
+  # Try to deparse character dates
+  if (class(start) == "character") {
+    warning("Start time was supplied as a character.")
+    start <- lubridate::as_datetime(start)
+  }
+
+  generate.interval(start = start, duration = duration, model = l2_model.nn)
 }
 
 #' @title Generate EV Owners' Level 2 Interval Data
@@ -123,4 +152,36 @@ syn_l2_custs <- function(start,
     dplyr::bind_rows(customers, .id = "customer_id"),
     customer_id, int.start, interval.kwh
     )
+}
+
+#' @title Roll Up kWh
+#' @description Aggregate kwh from session or interval, etc. data to a specified
+#' level - pass data grouped to the desired level.
+#' @param x Grouped data with kwh - note \code{"kwh"} should be a column in the
+#' data.
+#' @param .fn Aggregating function, default is \code{base::sum()}
+#' @param ... Additional arguments to pass to .fn
+#' @export
+agg_kwh <- function(x, .fn = sum, ...) {
+  stopifnot("kwh" %in% names(x))
+
+  x %>%
+    dplyr::summarise(kwh = .fn(kwh,...)) %>%
+    dplyr::ungroup()
+}
+
+#' @title Roll Up kW
+#' @description Aggregate kW from session or interval, etc. data to a specified
+#' level - pass data grouped to the desired level.
+#' @param x Grouped data with kwh - note \code{"kW"} should be a column in the
+#' data.
+#' @param .fn Aggregating function, default is \code{base::mean()}
+#' @param ... Additional arguments to pass to .fn
+#' @export
+agg_kw <- function(x, .fn = mean) {
+  stopifnot("kw" %in% names(x))
+
+  x %>%
+    dplyr::summarise(kw = .fn(kwh)) %>%
+    dplyr::ungroup()
 }
