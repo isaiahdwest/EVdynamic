@@ -4,7 +4,7 @@
 \alias{syn_l2_custs}
 \title{Generate EV Owners' Level 2 Interval Data}
 \usage{
-syn_l2_custs(start, end, num_customers = 10, seed = 123)
+syn_l2_custs(start, end, num_customers = 10, seed = 123, model = l2_model.nn)
 }
 \arguments{
 \item{start}{A datetime object, minimum time owners could start charging}

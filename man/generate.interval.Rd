@@ -2,13 +2,13 @@
 % Please edit documentation in R/fx_l2_gen_sess.R
 \name{generate.interval}
 \alias{generate.interval}
-\alias{generate.interval.default}
+\alias{generate.interval.nn}
 \alias{generate.interval.xgb.Booster}
 \title{Generate 15 min intervals}
 \usage{
 generate.interval(start, duration, model)
 
-\method{generate.interval}{default}(start, duration, model)
+\method{generate.interval}{nn}(start, duration, model = l2_model.nn)
 
 \method{generate.interval}{xgb.Booster}(start, duration, model)
 }

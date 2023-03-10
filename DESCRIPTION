@@ -19,6 +19,7 @@ Imports:
     neuralnet,
     padr,
     purrr,
+    secret,
     tidyr,
     utilityR (>= 0.0.1),
     xgboost

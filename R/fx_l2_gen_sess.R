@@ -16,7 +16,7 @@ hmdetc <- function(x) {
     day = lubridate::day(x),
     wewd = lubridate::wday(x),
     hour = lubridate::hour(x),
-    minute = round(minute(x)/15)*15
+    minute = round(lubridate::minute(x)/15)*15
   )
 }
 
@@ -49,7 +49,7 @@ generate.interval.nn <- function(start, duration, model = l2_model.nn) {
       minute = lubridate::minute(int.start),
       wewd = lubridate::wday(int.start)
     )
-  dplyr::mutate(startdf, interval.kwh = as.numeric(neural_net:::predict.nn(model, startdf)),
+  dplyr::mutate(startdf, interval.kwh = as.numeric(neuralnet:::predict.nn(model, startdf)),
                 interval.kwh = ifelse(interval.kwh < 0, 0, interval.kwh))
 }
 
@@ -93,15 +93,15 @@ generate.interval.xgb.Booster <- function(start, duration, model) {
 #' @param duration A double, number of hours the session lasts
 #' @export
 
-gen_l2_sess <- function(start, duration) {
+gen_l2_sess <- function(start, duration, model = l2_model.nn) {
 
   # Try to deparse character dates
-  if (class(start) == "character") {
+  if (all(class(start) == "character")) {
     warning("Start time was supplied as a character.")
     start <- lubridate::as_datetime(start)
   }
 
-  generate.interval(start = start, duration = duration, model = l2_model.nn)
+  generate.interval(start = start, duration = duration, model = model)
 }
 
 #' @title Generate EV Owners' Level 2 Interval Data
@@ -116,7 +116,8 @@ gen_l2_sess <- function(start, duration) {
 syn_l2_custs <- function(start,
                          end,
                          num_customers = 10,
-                         seed = 123) {
+                         seed = 123,
+                         model = l2_model.nn) {
   set.seed(123)
   customers <- list()
   for (i in 1:num_customers) {
@@ -138,13 +139,13 @@ syn_l2_custs <- function(start,
       weeks <- range[id:(id+671)]
     }
     session_starts <- sort(lubridate::as_datetime(session_starts))
-    session_duration0 <- tidyr::replace_na(as.numeric(floor(difftime(lead(session_starts), session_starts, units = "hours"))), sample(1:4, 1))
+    session_duration0 <- tidyr::replace_na(as.numeric(floor(difftime(dplyr::lead(session_starts), session_starts, units = "hours"))), sample(1:4, 1))
     session_duration <- purrr::map_int(session_duration0, ~sample(1:min(c(15,.x)), 1))
     # browser()
-    sessions0 <- purrr::map2_dfr(session_starts, session_duration, ~gen_l2_sess(.x,.y))
+    sessions0 <- purrr::map2_dfr(session_starts, session_duration, ~gen_l2_sess(.x,.y, model = model))
     sessions1 <- dplyr::mutate(padr::pad(sessions0, "15 min"),
                                interval.kwh = tidyr::replace_na(interval.kwh, 0),
-                               hour = hour(int.start))
+                               hour = lubridate::hour(int.start))
     customers[[i]] <- sessions1
   }
 

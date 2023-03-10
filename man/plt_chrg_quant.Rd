@@ -4,7 +4,7 @@
 \alias{plt_chrg_quant}
 \title{Plot Load Shape Quantiles}
 \usage{
-plt_chrg_quant(.data, time_col, grp_col, col = kwh, .fn = sum)
+plt_chrg_quant(.data, time_col, grp_col, load_col = kwh, .fn = sum)
 }
 \arguments{
 \item{.data}{Dataframe of interval charging data}
@@ -13,10 +13,10 @@ plt_chrg_quant(.data, time_col, grp_col, col = kwh, .fn = sum)
 
 \item{grp_col}{Column to group and determine quantiles from}
 
+\item{.fn}{Funciton to use to aggregate \code{col}, default is \code{sum}}
+
 \item{col}{Column in .data to aggregate and produce a load profile for,
 default is \code{kwh}}
-
-\item{.fn}{Funciton to use to aggregate \code{col}, default is \code{sum}}
 }
 \description{
 Plot Load Shape Quantiles

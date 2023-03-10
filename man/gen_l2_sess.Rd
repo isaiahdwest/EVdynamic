@@ -4,7 +4,7 @@
 \alias{gen_l2_sess}
 \title{Generate a level 2 charging Session for home chargers}
 \usage{
-gen_l2_sess(start, duration)
+gen_l2_sess(start, duration, model = l2_model.nn)
 }
 \arguments{
 \item{start}{A datetime object, when the session starts}

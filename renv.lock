@@ -861,7 +861,7 @@
       "RemoteRepo": "utilityR",
       "RemoteUsername": "isaiahdwest",
       "RemoteRef": "HEAD",
-      "RemoteSha": "d8e152c7936bd3430c840021d647ad6188825a48",
+      "RemoteSha": "add405dbba6ac69e7e8e00c035744f4ce21ba798",
       "Requirements": [
         "dplyr",
         "janitor",
@@ -869,7 +869,7 @@
         "renv",
         "stringr"
       ],
-      "Hash": "f52142d14da946a82d5805dda649d934"
+      "Hash": "39480dcbe0886dd97b1df732a95cfeff"
     },
     "vctrs": {
       "Package": "vctrs",
