@@ -8,9 +8,12 @@ plt_load(
   .data,
   time_col,
   load_col,
+  group_col = NULL,
   agg_fn = mean,
   time_agg = lubridate::hour,
+  plt_cf = FALSE,
   cf_fn = utilityR::cf.int,
+  peak_hrs = NULL,
   ...
 )
 }
@@ -21,14 +24,27 @@ plt_load(
 
 \item{load_col}{Column in \code{.data} with charging load}
 
+\item{group_col}{Default is \code{NULL}. If passed, what column to break
+load profiles out by, e.g. if a charging customer id column is passed, the output
+will have a load profile for each customer included.}
+
 \item{agg_fn}{Function to use to aggregate load data, default is \code{mean}}
 
 \item{time_agg}{What time interval to aggregate to, default is \code{lubridate::hour}}
 
-\item{cf_fn}{Function to calcualte a confidence interval around the aggregation statistic. Default is \code{utilityR::cf.int}}
+\item{plt_cf}{\code{TRUE}/\code{FALSE} - whether to plot confidence interval}
+
+\item{cf_fn}{Function to calculate a confidence interval around the aggregation statistic. Default is \code{utilityR::cf.int}}
 
 \item{...}{Additional arguments to pass to \code{plt_load}}
 }
 \description{
 Plot an aggregated load profile.
+}
+\examples{
+\dontrun{
+
+plt_load(l2_custs, time_col = int.start, load_col = interval.kwh / 0.25, group_col = cust)
+
+}
 }

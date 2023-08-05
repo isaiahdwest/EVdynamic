@@ -2,7 +2,7 @@
 % Please edit documentation in R/fx_afdc_data.R
 \name{removeNrelKey}
 \alias{removeNrelKey}
-\title{NREL_API}
+\title{NREL API}
 \usage{
 removeNrelKey(perm = FALSE)
 }
