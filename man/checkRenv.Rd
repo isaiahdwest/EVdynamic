@@ -2,7 +2,7 @@
 % Please edit documentation in R/fx_afdc_data.R
 \name{checkRenv}
 \alias{checkRenv}
-\title{Check .Renviron gitignore}
+\title{Check .gitignore for .Renviron}
 \usage{
 checkRenv()
 }
