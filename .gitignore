@@ -1,3 +1,10 @@
 .Rproj.user/
 vault/
 .Renviron
+inst/doc
+.Rhistory
+.Rbuildignore
+EVdynamic.Rproj
+data-raw/
+scrap_work/
+.html
